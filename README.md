@@ -1,12 +1,16 @@
-# themoviedb_get_all_movies
-Get all movies from themoviedb.org
+# themoviedb.org get all movies and tv
 
-for correct working you nedd to push your themoviedb.org key into 
+
+Get all movies and tv from themoviedb.org
+
+for correct working you need to push your themoviedb.org key into main.py
 ```
-  self.base_url = 'http://api.themoviedb.org/3/discover/movie?api_key=YOUR_THEMOVIEDB_KEY' \
-  '&language=ru&include_adult=true&page='
+api_key = '' #themoviedb api key
 ```
-and set up mysql connection
+and set up mysql connection into main.py
 ```
-conn = mysql.connector.connect(host='localhost', database='films', user='root', password='') 
+mysql_host = 'localhost' #hostname
+mysql_db = 'movies' #database name
+mysql_login = 'root' #mysql login
+mysql_password = '' #mysql password
 ```
