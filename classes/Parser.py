@@ -12,7 +12,7 @@ class Parser:
         self.latest_movie_url = (
             'http://api.themoviedb.org/3/movie/latest?api_key=%s&language=%s' % (api_key, language))
         self.latest_series_url = (
-            'http://api.themoviedb.org/3/movie/latest?api_key=%s&language=%s' % (api_key, language))
+            'http://api.themoviedb.org/3/tv/latest?api_key=%s&language=%s' % (api_key, language))
 
         self.total_movies = self.get_total_movies()
         self.total_series = self.get_total_series()
