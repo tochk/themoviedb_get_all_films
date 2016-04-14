@@ -120,7 +120,6 @@ class Parser:
         print("Inserted %d movies \nUpdated %d movies" % (inserted, updated))
         return 0
 
-
     def get_series(self, first_series=None, stop_series=None, cursor=None):
         inserted = 0
         updated = 0
@@ -134,54 +133,58 @@ class Parser:
         for series_id in range(int(first_series), int(stop_series) + 1):
             percent = round((series_id / stop_series) * 100, 3)
             print('%s percent completed (%s from %s)' % (str(percent), series_id, stop_series))
-            movie_url = (
-                'http://api.themoviedb.org/3/tv/%s?api_key=%s&language=%s' % series_id, self.api_key, self.language)
-            results = requests.get(movie_url).json()
+            tv_url = (
+                'http://api.themoviedb.org/3/tv/%s?api_key=%s&language=%s' % (series_id, self.api_key, self.language))
+            tv = requests.get(tv_url).json()
             time.sleep(0.4)
-            for tv in results:
-                cursor.execute("SELECT `title` FROM `series` WHERE `id`='%s'", tv['id'])
-                cursor.fetchall()
-                if cursor.rowcount == 0:
+            try:
+                tv['id']
+            except:
+                continue
+            cursor.execute("SELECT `title` FROM `series` WHERE `id`='%s'" % tv['id'])
+            cursor.fetchall()
+            if cursor.rowcount == 0:
+                cursor.execute(
+                    "INSERT INTO `series` (`id`, `original_title`, `title`, `overview`, `first_air_date`,"
+                    "`poster_path`, `original_language`,  `popularity`, `vote_count`, `vote_average`)"
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    (tv['id'], tv['original_name'], tv['name'], tv['overview'], tv['first_air_date'],
+                     tv['poster_path'], tv['original_language'], tv['popularity'], tv['vote_count'],
+                     tv['vote_average']))
+                for genre in tv['genre_ids']:
                     cursor.execute(
-                        "INSERT INTO `series` (`id`, `original_title`, `title`, `overview`, `first_air_date`,"
-                        "`poster_path`, `original_language`,  `popularity`, `vote_count`, `vote_average`)"
-                        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                        (tv['id'], tv['original_name'], tv['name'], tv['overview'], tv['first_air_date'],
-                         tv['poster_path'], tv['original_language'], tv['popularity'], tv['vote_count'],
-                         tv['vote_average']))
-                    for genre in tv['genre_ids']:
+                        "INSERT INTO `genre_series_merge` (`id`, `genreid`) VALUES (%s, %s)",
+                        (tv['id'], genre)
+                    )
+                inserted += 1
+                try:
+                    if self.debug_level >= 1:
+                        print("INSERTED: %s" % (tv['name']))
+                except UnicodeEncodeError:
+                    print('UnicodeEncodeError')
+            else:
+                cursor.execute(
+                    "UPDATE `series` SET `original_title` = %s, `title` = %s, `overview` = %s, "
+                    "`first_air_date` = %s, `poster_path` = %s, `original_language` = %s, `popularity` = %s, "
+                    "`vote_count` = %s, `vote_average` = %s WHERE `id` = %s",
+                    (tv['original_name'], tv['name'], tv['overview'], tv['first_air_date'],
+                     tv['poster_path'], tv['original_language'], tv['popularity'], tv['vote_count'],
+                     tv['vote_average'], tv['id']))
+                for genre in tv['genres']:
+                    try:
                         cursor.execute(
                             "INSERT INTO `genre_series_merge` (`id`, `genreid`) VALUES (%s, %s)",
-                            (tv['id'], genre)
+                            (tv['id'], genre['id'])
                         )
-                    inserted += 1
-                    try:
-                        if self.debug_level >= 1:
-                            print("INSERTED: %s" % (tv['name']))
-                    except UnicodeEncodeError:
-                        print('UnicodeEncodeError')
-                else:
-                    cursor.execute(
-                        "UPDATE `series` SET `original_title` = %s, `title` = %s, `overview` = %s, "
-                        "`first_air_date` = %s, `poster_path` = %s, `original_language` = %s, `popularity` = %s, "
-                        "`vote_count` = %s, `vote_average` = %s WHERE `movies`.`id` = %s",
-                        (tv['original_name'], tv['name'], tv['overview'], tv['first_air_date'],
-                         tv['poster_path'], tv['original_language'], tv['popularity'], tv['vote_count'],
-                         tv['vote_average'], tv['id']))
-                    for genre in tv['genres']:
-                        try:
-                            cursor.execute(
-                                "INSERT INTO `genre_series_merge` (`id`, `genreid`) VALUES (%s, %s)",
-                                (tv['id'], genre['id'])
-                            )
-                        except:
-                            if self.debug_level >= 2:
-                                print("Already in DB")
-                    updated += 1
-                    try:
+                    except:
                         if self.debug_level >= 2:
-                            print("UPDATED: %s" % (tv['title']))
-                    except UnicodeEncodeError:
-                        print('UnicodeEncodeError')
+                            print("Already in DB")
+                updated += 1
+                try:
+                    if self.debug_level >= 2:
+                        print("UPDATED: %s" % (tv['name']))
+                except UnicodeEncodeError:
+                    print('UnicodeEncodeError')
+
         print("Inserted %d series \nUpdated %d series" % (inserted, updated))
         return 0
