@@ -15,7 +15,6 @@ if __name__ == "__main__":
                                    port=mysql_port)
     cursor = conn.cursor()
     parser = Parser(api_key, language, debug_level)
-    stop_movie_page = parser.get_total_movies_pages()
     parser.get_all_genres(cursor)
     parser.get_movies(None, None, cursor)
     parser.get_series(None, None, cursor)
