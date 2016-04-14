@@ -53,7 +53,7 @@ ALTER TABLE `movies`
 
 ALTER TABLE `series`
   ADD PRIMARY KEY (`id`);
-  
+
 ALTER TABLE `genre_series_merge`
   ADD PRIMARY KEY (`id`,`genreid`),
   ADD KEY `genre_series_merge_fk1` (`genreid`);

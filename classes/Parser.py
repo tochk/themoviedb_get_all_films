@@ -60,7 +60,7 @@ class Parser:
             try:
                 print('%s percent completed (%s from %s)' % (str(percent), page, stop_page))
                 results = requests.get('%s%s' % (self.base_movies_url, page)).json()['results']
-                time.sleep(0.3)
+                time.sleep(0.4)
                 for movie in results:
                     cursor.execute("SELECT `title` FROM `movies` WHERE `id`='%s'" % movie['id'])
                     cursor.fetchall()
@@ -111,6 +111,7 @@ class Parser:
                             print('UnicodeEncodeError')
             except KeyError:
                 print('KeyError')
+                time.sleep(1)
         print("Inserted %d movies \nUpdated %d movies" % (inserted, updated))
         return 0
 
@@ -129,7 +130,7 @@ class Parser:
             try:
                 print('%s percent completed (%s from %s)' % (str(percent), page, stop_page))
                 results = requests.get('%s%s' % (self.base_series_url, page)).json()['results']
-                time.sleep(0.3)
+                time.sleep(0.4)
                 for tv in results:
                     cursor.execute("SELECT `title` FROM `series` WHERE `id`='%s'", tv['id'])
                     cursor.fetchall()
@@ -177,5 +178,6 @@ class Parser:
                             print('UnicodeEncodeError')
             except KeyError:
                 print('KeyError')
+                time.sleep(1)
         print("Inserted %d series \nUpdated %d series" % (inserted, updated))
         return 0
