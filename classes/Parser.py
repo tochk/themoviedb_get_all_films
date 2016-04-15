@@ -187,12 +187,13 @@ class Parser:
             cursor.execute("SELECT `title` FROM `series` WHERE `id`='%s'" % tv['id'])
             cursor.fetchall()
             if cursor.rowcount == 0:
-                self.update_series(cursor, tv)
+                self.insert_series(cursor, tv)
                 self.insert_genre_series(cursor, tv['genres'], tv['id'])
                 inserted += 1
             else:
                 self.update_series(cursor, tv)
                 self.insert_genre_series(cursor, tv['genres'], tv['id'])
+                updated += 1
 
         print("Inserted %d series \nUpdated %d series" % (inserted, updated))
         return 0
